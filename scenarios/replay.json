@@ -1,0 +1,9 @@
+{
+  "id": "replay",
+  "description": "Historical fixed-cycle ECU replies for ABS/CLIMAT/AIRBAG/ENGINE/UCH and other discovered ECUs; no DDT JSON required.",
+  "mode": "replay",
+  "clock_rate": 1,
+  "cycle_seconds": 240,
+  "field_events": [],
+  "dropouts": []
+}
