@@ -1,0 +1,52 @@
+{
+  "id": "climate_faults_fast",
+  "description": "Accelerated 60-second complete climate DTC/regression test (4x scenario clock).",
+  "mode": "dynamic_climate",
+  "clock_rate": 4,
+  "cycle_seconds": 240,
+  "field_events": [
+    {
+      "field": "CC présent capteur freon condenseur",
+      "value": "Defaut",
+      "start": 180,
+      "end": 200
+    },
+    {
+      "field": "CC mémo capteur freon condenseur",
+      "value": "Defaut",
+      "start": 180,
+      "end": 240
+    },
+    {
+      "field": "CO présent sonde évapo",
+      "value": "Defaut",
+      "start": 200,
+      "end": 220
+    },
+    {
+      "field": "CO mémo sonde évapo",
+      "value": "Defaut",
+      "start": 200,
+      "end": 240
+    },
+    {
+      "field": "ABS absent",
+      "value": "Absent",
+      "start": 210,
+      "end": 230
+    },
+    {
+      "field": "ABS absent - compteur panne mémo",
+      "value": 3,
+      "start": 210,
+      "end": 240
+    }
+  ],
+  "dropouts": [
+    {
+      "request": "21C1",
+      "start": 210,
+      "end": 220
+    }
+  ]
+}
