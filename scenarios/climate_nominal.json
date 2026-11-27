@@ -1,0 +1,9 @@
+{
+  "id": "climate_nominal",
+  "description": "Dynamic CLIMAT 240s, heating and A/C without injected active or stored faults.",
+  "mode": "dynamic_climate",
+  "clock_rate": 1,
+  "cycle_seconds": 240,
+  "field_events": [],
+  "dropouts": []
+}
