@@ -1,0 +1,52 @@
+{
+  "id": "climate_ddt_0456",
+  "description": "DDT Mobile 0.4.5.6 acceptance scenario: 21C0 active/memory flags, 2182 ABS communication counter, 21C1 dropout and recovery.",
+  "mode": "dynamic_climate",
+  "clock_rate": 1,
+  "cycle_seconds": 240,
+  "field_events": [
+    {
+      "field": "CC présent capteur freon condenseur",
+      "value": "Defaut",
+      "start": 180,
+      "end": 200
+    },
+    {
+      "field": "CC mémo capteur freon condenseur",
+      "value": "Defaut",
+      "start": 180,
+      "end": 240
+    },
+    {
+      "field": "CO présent sonde évapo",
+      "value": "Defaut",
+      "start": 200,
+      "end": 220
+    },
+    {
+      "field": "CO mémo sonde évapo",
+      "value": "Defaut",
+      "start": 200,
+      "end": 240
+    },
+    {
+      "field": "ABS absent",
+      "value": "Absent",
+      "start": 210,
+      "end": 230
+    },
+    {
+      "field": "ABS absent - compteur panne mémo",
+      "value": 3,
+      "start": 210,
+      "end": 240
+    }
+  ],
+  "dropouts": [
+    {
+      "request": "21C1",
+      "start": 210,
+      "end": 220
+    }
+  ]
+}
