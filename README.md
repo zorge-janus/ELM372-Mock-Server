@@ -1,19 +1,20 @@
 # ELM372 Mock Server
 
-Локальный эмулятор **ELM327 / Renault KWP2000** для проверки DDT Mobile. Название репозитория ELM372 сохранено, протокол эмулируется как ELM327. Интерфейса выбора сценария нет: нужный JSON-файл выбирается аргументом `--scenario`.
+A local **ELM327 / Renault KWP2000** emulator for testing DDT Mobile. The repository retains the ELM372 name, while the emulated adapter protocol is ELM327. There is no graphical scenario selector: select the required JSON scenario using the `--scenario` argument.
 
-**Не подключается к автомобилю.** Работает через Windows Bluetooth Serial Port Profile (входящий COM) или локальный TCP. Команды записи и стирания ошибок не исполняются.
+**No vehicle connection is required.** The server operates over Windows Bluetooth Serial Port Profile (incoming COM port) or local TCP. Write and fault-clearing commands are not executed.
 
-## Быстрый запуск Windows
+## Windows Quick Start
 
-1. Установить Python 3.10+ (`py -3 --version`).
-2. Для Bluetooth установить `py -3 -m pip install pyserial`.
-3. Создать **входящий** Bluetooth COM-порт в настройках Windows, спарить ПК и Android, узнать номер COM.
-4. Для сценария `climate_ddt_0456` положить оригинальный `Clim_J81_Serie_(vers07).json` в папку репозитория. Он **не распространяется** здесь.
-5. Запустить `START_BLUETOOTH.bat`, указать номер входящего COM и имя сценария.
-6. В DDT Mobile 0.4.5.6 выбрать Bluetooth ПК, выполнить Scan, открыть CLIMAT (адрес `29`) и начать непрерывное чтение. Отправить диагностический лог после полного сценария.
+1. Install Python 3.10 or later (`py -3 --version`).
+2. For Bluetooth support, run `py -3 -m pip install pyserial`.
+3. Create an **incoming** Bluetooth COM port in Windows settings, pair the PC with the Android device, and identify the COM port number.
+4. For the `climate_ddt_0456` scenario, place the original `Clim_J81_Serie_(vers07).json` file in the repository directory. This file is **not distributed** with the server.
+5. Run `START_BLUETOOTH.bat` and enter the scenario name and incoming COM port number.
+6. In DDT Mobile 0.4.5.6, select the PC as the Bluetooth device, run Scan, open CLIMAT (address `29`), and start continuous reading. Export and share the diagnostic log after completing the scenario.
 
-Прямой запуск:
+Direct command-line usage:
+
 ```bat
 py -3 elm_mock.py --list-scenarios
 py -3 elm_mock.py --scenario climate_ddt_0456 --serial COM9 --definition "Clim_J81_Serie_(vers07).json"
@@ -22,53 +23,63 @@ py -3 elm_mock.py --scenario replay --serial COM9
 py -3 elm_mock.py --scenario climate_ddt_0456 --host 127.0.0.1 --port 35000 --definition "Clim_J81_Serie_(vers07).json"
 ```
 
-В BAT-файлах сценарий выбирается по имени, без графического интерфейса. Названия соответствуют JSON-файлам в `scenarios/`. `--scenario` допускает только имена из этой папки; произвольные пути и абсолютные имена отклоняются. TCP по умолчанию слушает **только** 127.0.0.1; Android через TCP сможет подключаться лишь при наличии TCP-транспорта в самом APK и настройке частного адреса ПК. TCP не защищён паролем, **не публиковать его в интернет**.
+The batch files select scenarios by name without a graphical interface. Scenario names correspond to JSON files in `scenarios/`. The `--scenario` argument accepts only names from this directory; arbitrary paths and absolute paths are rejected.
 
-## Сценарии
+By default, TCP listens **only** on 127.0.0.1. Android TCP connections require TCP transport support in the APK and configuration of the PC's private IP address. TCP is not password-protected: **do not expose it to the internet**.
 
-| Имя | Режим | Назначение |
+## Available Scenarios
+
+| Name | Mode | Purpose |
 |---|---|---|
-| `replay` | Циклические записанные ответы | Базовая проверка семи ECU, ABS, климата и других модулей |
-| `climate_nominal` | Динамический CLIMAT | Температура, CTP, A/C, оборудование без добавленных ошибок |
-| `climate_ddt_0456` | Динамический CLIMAT | Полный 240-секундный тест DDT Mobile 0.4.5.6 |
-| `climate_faults_fast` | Динамический CLIMAT | Тот же цикл ошибок, ускоренный в 4 раза (60 с) |
+| `replay` | Cyclic recorded responses | Baseline testing of seven ECUs, including ABS, climate control, and other modules |
+| `climate_nominal` | Dynamic CLIMAT | Temperature, PTC heating, A/C, and equipment without injected faults |
+| `climate_ddt_0456` | Dynamic CLIMAT | Complete 240-second acceptance test for DDT Mobile 0.4.5.6 |
+| `climate_faults_fast` | Dynamic CLIMAT | The same fault cycle at four times the speed (60 seconds) |
 
-### climate_ddt_0456 — временная шкала
+### climate_ddt_0456 — Scenario Timeline
 
-| От начала чтения 21C0/21C1/21C2/2182 | Ожидаемые данные |
+| Time since reading 21C0/21C1/21C2/2182 began | Expected data |
 |---|---|
-| 0–30 с | Холодный салон, двигатель выключен |
-| 30–120 с | Двигатель запущен, ступени CTP, прогрев |
-| 120–180 с | Запрос A/C, компрессор и модель давления |
-| 180–200 с | `CC présent capteur freon condenseur=Defaut` (текущая) |
-| 180–240 с | `CC mémo capteur freon condenseur=Defaut` (сохранённая) |
-| 200–220 с | `CO présent sonde évapo=Defaut` |
-| 200–240 с | `CO mémo sonde évapo=Defaut` |
-| 210–230 с | `ABS absent=Absent`, счётчик = 3 в 2182 |
-| 210–220 с | `21C1 → NO DATA`, проверка восстановления данных |
-| 240 с | Повторение модели, флаги сценария сбрасываются |
+| 0–30 s | Cold cabin, engine stopped |
+| 30–120 s | Engine running, PTC heating stages, warm-up |
+| 120–180 s | A/C request, compressor operation, and simulated pressure |
+| 180–200 s | `CC présent capteur freon condenseur=Defaut` (active fault) |
+| 180–240 s | `CC mémo capteur freon condenseur=Defaut` (stored fault) |
+| 200–220 s | `CO présent sonde évapo=Defaut` |
+| 200–240 s | `CO mémo sonde évapo=Defaut` |
+| 210–230 s | `ABS absent=Absent`, fault counter = 3 in 2182 |
+| 210–220 s | `21C1 → NO DATA`, testing data recovery |
+| 240 s | Scenario repeats and simulated fault flags reset |
 
-Ошибки здесь **синтетические**, не основаны на физических порогах Renault. Регистр `21C0` содержит неисправности как обычные битовые параметры, `2182` — коммуникационные флаги и счётчики. Все ответы вне динамически изменяемых полей берутся из исторических записей.
+These faults are **synthetic** and are not based on Renault's physical operating thresholds. Register `21C0` contains faults as ordinary bit-level diagnostic parameters, while `2182` contains communication flags and counters. Fields not modified dynamically retain their recorded values.
 
-## Команды и данные
+## Supported Commands and Data
 
-Эмулируются ATZ, ATI, ATRV, ATE0/1, ATL0/1, ATS0/1, ATH0, ATAT0, ATSTFF, ATSP5, ATPC, ATSH81xxF1, ATFI, ATDP, ATDPN, KWP запросы 21xx/22xxxx/1Axx/17FF00, которые присутствуют в корпусе. Неизвестный ECU или регистр → NO DATA, неподдержанная команда → ?. Записывающие запросы не моделируются. `--speed 0` без задержки, `--speed 1` воспроизводит исходные задержки (по умолчанию 0.1). `ATRV` сообщает 14.2 V, это не напряжение реальной машины.
+The server emulates ATZ, ATI, ATRV, ATE0/1, ATL0/1, ATS0/1, ATH0, ATAT0, ATSTFF, ATSP5, ATPC, ATSH81xxF1, ATFI, ATDP, ATDPN, and KWP requests 21xx/22xxxx/1Axx/17FF00 available in the replay corpus.
 
-Корпус `scenarios/replay_corpus.xz.b64` содержит 368 ранее записанных ответов семи ECU (01, 0D, 12, 26, 29, 2C, 7A). Формат сжат для хранения в Git; при запуске распаковывается в памяти. **VIN заменён на тестовый `VF1MOCK0000000001`**, оригинальный идентификатор автомобиля в открытый репозиторий не загружается. Для динамических значений требуется оригинальное определение DDT в JSON: оно задаёт точные смещения бит, размеры и шкалы. Если определения нет, запустится только `replay`.
+Unknown ECU or register returns NO DATA; unsupported commands return ?. Write requests are not simulated. Use `--speed 0` for no response delay or `--speed 1` to reproduce recorded delays (default: 0.1). ATRV reports a simulated 14.2 V, not an actual vehicle voltage.
 
-Лог сервера печатает адрес ECU, запрос и ответ в терминал. В DDT Mobile нужно экспортировать Diagnostic Logs после испытания: в них сохраняются `sample`, `fault_snapshot` и исходные HEX-кадры. **Сервер не сохраняет автоматически лог приложения Android.**
+The `scenarios/replay_corpus.xz.b64` corpus contains 368 previously recorded responses from seven ECUs (01, 0D, 12, 26, 29, 2C, 7A). It is compressed for storage in Git and decompressed in memory at startup.
 
-## Тестирование
+**The VIN has been replaced with the test identifier `VF1MOCK0000000001`.** The original vehicle identifier is not published in the public repository.
+
+Dynamic values require the original DDT JSON definition, which specifies exact bit offsets, field sizes, and scaling factors. Without this definition, only the `replay` scenario can run.
+
+The server prints the ECU address, request, and response to the terminal. After testing, export Diagnostic Logs from DDT Mobile: these contain `sample`, `fault_snapshot`, and raw HEX frames. **The server does not automatically save the Android application's diagnostic log.**
+
+## Testing
+
+Run the test suite manually:
 
 ```bat
 py -3 -m unittest discover -s tests -v
 ```
 
-Тесты проверяют инициализацию 7 ECU, ABS/CLIMAT replay, подбор сценария, динамическую кодировку битов, текущие/сохранённые ошибки, сетевые флаги и цикл 240 с. Тесты не заменяют реальное Bluetooth SPP и проверку с оригинальным JSON на автомобиле.
+The tests cover initialization of seven ECUs, ABS and CLIMAT replay, scenario selection, dynamic bit encoding, active and stored faults, network flags, and the 240-second cycle. These tests do not replace real Bluetooth SPP integration testing or vehicle testing with the original DDT JSON definition.
 
-**Без GitHub Actions:** в репозитории нет CI workflow, тесты запускаются вручную.
+**No GitHub Actions:** this repository contains no CI workflows. Tests are run manually.
 
-## Структура
+## Repository Structure
 
 ```text
 elm_mock.py
