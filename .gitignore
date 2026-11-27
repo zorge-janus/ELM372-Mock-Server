@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+*.log
+*.jks
+*.keystore
+Clim_J81_Serie_(vers07).json
+vehicle.json
+DDT_*.txt
+DDT_*.json
+*.zip
