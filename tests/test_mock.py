@@ -58,8 +58,9 @@ class MockProtocolTests(unittest.TestCase):
     def test_history_not_truncated(self):
         self.assertEqual(len(self.data["ecus"]),7)
         self.assertEqual(sum(len(rows) for commands in self.data["ecus"].values() for rows in commands.values()),368)
-        self.assertNotIn("VF1JK0UA635647506",str(self.data))
-        self.assertIn("VF1MOCK0000000001",str(self.data))
+        raw_vin=bytes.fromhex(self.data["ecus"]["29"]["2181"][0]["raw"])
+        self.assertNotIn(b"VF1JK0UA635647506",raw_vin)
+        self.assertIn(b"VF1MOCK0000000001",raw_vin)
 
     def test_scenario_names(self):
         self.assertEqual(list_scenarios(),["climate_ddt_0456","climate_faults_fast","climate_nominal","replay"])
